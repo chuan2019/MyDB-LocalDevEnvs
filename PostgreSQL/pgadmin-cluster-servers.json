@@ -1,0 +1,54 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "PostgreSQL Primary",
+      "Group": "Cluster",
+      "Host": "postgres-primary",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "PassFile": "/tmp/pgpassfile",
+      "SSLMode": "prefer"
+    },
+    "2": {
+      "Name": "PostgreSQL Replica 1",
+      "Group": "Cluster",
+      "Host": "postgres-replica-1",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "PassFile": "/tmp/pgpassfile",
+      "SSLMode": "prefer"
+    },
+    "3": {
+      "Name": "PostgreSQL Replica 2",
+      "Group": "Cluster",
+      "Host": "postgres-replica-2",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "PassFile": "/tmp/pgpassfile",
+      "SSLMode": "prefer"
+    },
+    "4": {
+      "Name": "Load Balancer (Write)",
+      "Group": "Load Balanced",
+      "Host": "haproxy",
+      "Port": 5430,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "PassFile": "/tmp/pgpassfile",
+      "SSLMode": "prefer"
+    },
+    "5": {
+      "Name": "Load Balancer (Read)",
+      "Group": "Load Balanced",
+      "Host": "haproxy",
+      "Port": 5431,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "PassFile": "/tmp/pgpassfile",
+      "SSLMode": "prefer"
+    }
+  }
+}
