@@ -1,0 +1,139 @@
+services:
+  mongodb-primary:
+    image: mongo:7.0
+    container_name: mongodb_primary
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-devdb}
+      MONGO_REPLICA_SET_NAME: ${MONGO_REPLICA_SET_NAME:-rs0}
+    ports:
+      - "${MONGO_PRIMARY_PORT:-27017}:27017"
+    volumes:
+      - mongodb_primary_data:/data/db
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./mongod-replica.conf:/etc/mongod.conf
+      - ./mongodb-keyfile:/tmp/mongodb-keyfile:ro
+      - ./scripts:/scripts
+    command: >
+      bash -c "
+        mkdir -p /data/configdb &&
+        cp /tmp/mongodb-keyfile /data/configdb/mongodb-keyfile &&
+        chmod 400 /data/configdb/mongodb-keyfile &&
+        chown mongodb:mongodb /data/configdb/mongodb-keyfile &&
+        mongod --config /etc/mongod.conf --replSet ${MONGO_REPLICA_SET_NAME:-rs0} --auth --bind_ip_all
+      "
+    networks:
+      - mongodb_cluster_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mongodb-secondary-1:
+    image: mongo:7.0
+    container_name: mongodb_secondary_1
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-admin123}
+      MONGO_REPLICA_SET_NAME: ${MONGO_REPLICA_SET_NAME:-rs0}
+    ports:
+      - "${MONGO_SECONDARY1_PORT:-27018}:27017"
+    volumes:
+      - mongodb_secondary1_data:/data/db
+      - ./mongod-replica.conf:/etc/mongod.conf
+      - ./mongodb-keyfile:/tmp/mongodb-keyfile:ro
+    command: >
+      bash -c "
+        mkdir -p /data/configdb &&
+        cp /tmp/mongodb-keyfile /data/configdb/mongodb-keyfile &&
+        chmod 400 /data/configdb/mongodb-keyfile &&
+        chown mongodb:mongodb /data/configdb/mongodb-keyfile &&
+        mongod --config /etc/mongod.conf --replSet ${MONGO_REPLICA_SET_NAME:-rs0} --auth --bind_ip_all
+      "
+    networks:
+      - mongodb_cluster_network
+    depends_on:
+      mongodb-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mongodb-secondary-2:
+    image: mongo:7.0
+    container_name: mongodb_secondary_2
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-admin123}
+      MONGO_REPLICA_SET_NAME: ${MONGO_REPLICA_SET_NAME:-rs0}
+    ports:
+      - "${MONGO_SECONDARY2_PORT:-27019}:27017"
+    volumes:
+      - mongodb_secondary2_data:/data/db
+      - ./mongod-replica.conf:/etc/mongod.conf
+      - ./mongodb-keyfile:/tmp/mongodb-keyfile:ro
+    command: >
+      bash -c "
+        mkdir -p /data/configdb &&
+        cp /tmp/mongodb-keyfile /data/configdb/mongodb-keyfile &&
+        chmod 400 /data/configdb/mongodb-keyfile &&
+        chown mongodb:mongodb /data/configdb/mongodb-keyfile &&
+        mongod --config /etc/mongod.conf --replSet ${MONGO_REPLICA_SET_NAME:-rs0} --auth --bind_ip_all
+      "
+    networks:
+      - mongodb_cluster_network
+    depends_on:
+      mongodb-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo_express_cluster
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-admin123}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-admin123}@mongodb-primary:27017,mongodb-secondary-1:27017,mongodb-secondary-2:27017/?replicaSet=${MONGO_REPLICA_SET_NAME:-rs0}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME:-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:-admin123}
+      ME_CONFIG_MONGODB_SERVER: mongodb-primary
+    ports:
+      - "${MONGO_EXPRESS_PORT:-8081}:8081"
+    depends_on:
+      mongodb-primary:
+        condition: service_healthy
+      mongodb-secondary-1:
+        condition: service_healthy
+      mongodb-secondary-2:
+        condition: service_healthy
+    networks:
+      - mongodb_cluster_network
+
+volumes:
+  mongodb_primary_data:
+    driver: local
+  mongodb_secondary1_data:
+    driver: local
+  mongodb_secondary2_data:
+    driver: local
+  mongoexpress_data:
+    driver: local
+
+networks:
+  mongodb_cluster_network:
+    driver: bridge
