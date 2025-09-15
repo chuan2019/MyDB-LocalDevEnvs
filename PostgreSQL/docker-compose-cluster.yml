@@ -37,24 +37,23 @@ services:
       POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD:-replicator123}
       POSTGRES_PRIMARY_HOST: postgres-primary
       POSTGRES_PRIMARY_PORT: 5432
+      PGUSER: postgres
     ports:
       - "${POSTGRES_REPLICA1_PORT:-5433}:5432"
     volumes:
       - postgres_replica1_data:/var/lib/postgresql/data
-      - ./postgresql-replica.conf:/etc/postgresql/postgresql.conf
-      - ./setup-replica.sh:/docker-entrypoint-initdb.d/setup-replica.sh
-    command: >
-      bash -c "
-      if [ ! -f /var/lib/postgresql/data/recovery.conf ] && [ ! -f /var/lib/postgresql/data/standby.signal ]; then
-        echo 'Setting up replica...'
-        rm -rf /var/lib/postgresql/data/*
-        PGPASSWORD=$$POSTGRES_REPLICATION_PASSWORD pg_basebackup -h $$POSTGRES_PRIMARY_HOST -D /var/lib/postgresql/data -U $$POSTGRES_REPLICATION_USER -v -P -W
-        echo 'standby_mode = \"on\"' >> /var/lib/postgresql/data/postgresql.auto.conf
-        echo 'primary_conninfo = \"host=$$POSTGRES_PRIMARY_HOST port=5432 user=$$POSTGRES_REPLICATION_USER\"' >> /var/lib/postgresql/data/postgresql.auto.conf
-        touch /var/lib/postgresql/data/standby.signal
-      fi
-      postgres -c config_file=/etc/postgresql/postgresql.conf
-      "
+    entrypoint: |
+      bash -c '
+        echo "Setting up replica..."
+        if [ ! -f /var/lib/postgresql/data/PG_VERSION ]; then
+          echo "Initializing replica from primary..."
+          PGPASSWORD=$$POSTGRES_REPLICATION_PASSWORD pg_basebackup -h $$POSTGRES_PRIMARY_HOST -D /var/lib/postgresql/data -U $$POSTGRES_REPLICATION_USER -v -P -W
+          echo "primary_conninfo = '\''host=$$POSTGRES_PRIMARY_HOST port=5432 user=$$POSTGRES_REPLICATION_USER password=$$POSTGRES_REPLICATION_PASSWORD'\''" >> /var/lib/postgresql/data/postgresql.auto.conf
+          touch /var/lib/postgresql/data/standby.signal
+          chown -R postgres:postgres /var/lib/postgresql/data
+        fi
+        exec docker-entrypoint.sh postgres
+      '
     depends_on:
       postgres-primary:
         condition: service_healthy
@@ -77,24 +76,23 @@ services:
       POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD:-replicator123}
       POSTGRES_PRIMARY_HOST: postgres-primary
       POSTGRES_PRIMARY_PORT: 5432
+      PGUSER: postgres
     ports:
       - "${POSTGRES_REPLICA2_PORT:-5434}:5432"
     volumes:
       - postgres_replica2_data:/var/lib/postgresql/data
-      - ./postgresql-replica.conf:/etc/postgresql/postgresql.conf
-      - ./setup-replica.sh:/docker-entrypoint-initdb.d/setup-replica.sh
-    command: >
-      bash -c "
-      if [ ! -f /var/lib/postgresql/data/recovery.conf ] && [ ! -f /var/lib/postgresql/data/standby.signal ]; then
-        echo 'Setting up replica...'
-        rm -rf /var/lib/postgresql/data/*
-        PGPASSWORD=$$POSTGRES_REPLICATION_PASSWORD pg_basebackup -h $$POSTGRES_PRIMARY_HOST -D /var/lib/postgresql/data -U $$POSTGRES_REPLICATION_USER -v -P -W
-        echo 'standby_mode = \"on\"' >> /var/lib/postgresql/data/postgresql.auto.conf
-        echo 'primary_conninfo = \"host=$$POSTGRES_PRIMARY_HOST port=5432 user=$$POSTGRES_REPLICATION_USER\"' >> /var/lib/postgresql/data/postgresql.auto.conf
-        touch /var/lib/postgresql/data/standby.signal
-      fi
-      postgres -c config_file=/etc/postgresql/postgresql.conf
-      "
+    entrypoint: |
+      bash -c '
+        echo "Setting up replica..."
+        if [ ! -f /var/lib/postgresql/data/PG_VERSION ]; then
+          echo "Initializing replica from primary..."
+          PGPASSWORD=$$POSTGRES_REPLICATION_PASSWORD pg_basebackup -h $$POSTGRES_PRIMARY_HOST -D /var/lib/postgresql/data -U $$POSTGRES_REPLICATION_USER -v -P -W
+          echo "primary_conninfo = '\''host=$$POSTGRES_PRIMARY_HOST port=5432 user=$$POSTGRES_REPLICATION_USER password=$$POSTGRES_REPLICATION_PASSWORD'\''" >> /var/lib/postgresql/data/postgresql.auto.conf
+          touch /var/lib/postgresql/data/standby.signal
+          chown -R postgres:postgres /var/lib/postgresql/data
+        fi
+        exec docker-entrypoint.sh postgres
+      '
     depends_on:
       postgres-primary:
         condition: service_healthy
