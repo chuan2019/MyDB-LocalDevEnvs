@@ -1,7 +1,7 @@
 # PostgreSQL Local Development Environment Makefile
 # This Makefile provides convenient commands for managing PostgreSQL single node and cluster setups
 
-.PHONY: help single-up single-down cluster-up cluster-down status logs clean
+.PHONY: help single-up single-down cluster-up cluster-down down status logs clean
 .PHONY: backup restore monitor test-replication
 .PHONY: connect-single connect-primary connect-replica1 connect-replica2
 .PHONY: connect-lb-write connect-lb-read pgadmin haproxy-stats
@@ -53,13 +53,13 @@ cluster-up: ## Start PostgreSQL cluster with replicas and load balancer
 	@echo "$(GREEN)Starting PostgreSQL cluster...$(NC)"
 	docker-compose -f $(COMPOSE_FILE_CLUSTER) up -d
 	@echo "$(GREEN)Cluster started successfully!$(NC)"
-	@echo "Primary: localhost:5432"
+	@echo "Primary: localhost:5435"
 	@echo "Replica 1: localhost:5433"
 	@echo "Replica 2: localhost:5434"
 	@echo "Load Balancer (Write): localhost:5430"
 	@echo "Load Balancer (Read): localhost:5431"
 	@echo "HAProxy Stats: http://localhost:8404/stats"
-	@echo "pgAdmin: http://localhost:8080"
+	@echo "pgAdmin: http://localhost:8081"
 
 cluster-down: ## Stop PostgreSQL cluster
 	@echo "$(YELLOW)Stopping PostgreSQL cluster...$(NC)"
@@ -71,13 +71,35 @@ cluster-restart: ## Restart PostgreSQL cluster
 	docker-compose -f $(COMPOSE_FILE_CLUSTER) restart
 	@echo "$(GREEN)Cluster restarted!$(NC)"
 
+##@ General Operations
+down: ## Stop all PostgreSQL services (single node and cluster)
+	@echo "$(YELLOW)Stopping all PostgreSQL services...$(NC)"
+	@docker-compose -f $(COMPOSE_FILE_SINGLE) down 2>/dev/null || true
+	@docker-compose -f $(COMPOSE_FILE_CLUSTER) down 2>/dev/null || true
+	@echo "$(GREEN)All PostgreSQL services stopped!$(NC)"
+
 ##@ Status and Monitoring
 status: ## Show status of all services
-	@echo "$(BLUE)=== Single Node Status ===$(NC)"
-	@docker-compose -f $(COMPOSE_FILE_SINGLE) ps 2>/dev/null || echo "Single node not running"
-	@echo
-	@echo "$(BLUE)=== Cluster Status ===$(NC)"
-	@docker-compose -f $(COMPOSE_FILE_CLUSTER) ps 2>/dev/null || echo "Cluster not running"
+	@single_running=$$(docker ps --filter "name=postgres_dev" --filter "status=running" -q | wc -l); \
+	cluster_running=$$(docker ps --filter "name=postgres_primary" --filter "status=running" -q | wc -l); \
+	if [ $$single_running -gt 0 ]; then \
+		echo "$(BLUE)=== Single Node Status ===$(NC)"; \
+		docker ps --filter "name=postgres_dev" --format "table {{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null; \
+		docker ps --filter "name=pgadmin_dev" --format "table {{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | tail -n +2; \
+		echo; \
+	fi; \
+	if [ $$cluster_running -gt 0 ]; then \
+		echo "$(BLUE)=== Cluster Status ===$(NC)"; \
+		docker ps --filter "name=postgres_primary" --format "table {{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null; \
+		docker ps --filter "name=postgres_replica" --format "table {{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | tail -n +2; \
+		docker ps --filter "name=pgadmin_cluster" --format "table {{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | tail -n +2; \
+		docker ps --filter "name=haproxy" --format "table {{.Names}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | tail -n +2; \
+		echo; \
+	fi; \
+	if [ $$single_running -eq 0 ] && [ $$cluster_running -eq 0 ]; then \
+		echo "$(YELLOW)No PostgreSQL services are currently running$(NC)"; \
+		echo "Use 'make single-up' or 'make cluster-up' to start services"; \
+	fi
 
 logs: ## Show logs from all services
 	@echo "$(BLUE)Choose log source:$(NC)"

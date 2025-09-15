@@ -100,12 +100,22 @@ down:
 	@docker-compose -p weaviate-cluster -f docker/docker-compose.cluster.yml down 2>/dev/null || true
 
 status:
-	@echo "Checking all possible services..."
-	@echo "--- Single Node Services ---"
-	@docker-compose -p weaviate-single -f docker/docker-compose.single.yml ps 2>/dev/null || echo "No single node services running"
-	@echo ""
-	@echo "--- Cluster Services ---"
-	@docker-compose -p weaviate-cluster -f docker/docker-compose.cluster.yml ps 2>/dev/null || echo "No cluster services running"
+	@single_running=$$(docker-compose -p weaviate-single -f docker/docker-compose.single.yml ps -q 2>/dev/null | wc -l); \
+	cluster_running=$$(docker-compose -p weaviate-cluster -f docker/docker-compose.cluster.yml ps -q 2>/dev/null | wc -l); \
+	if [ $$single_running -gt 0 ]; then \
+		echo "--- Single Node Services ---"; \
+		docker-compose -p weaviate-single -f docker/docker-compose.single.yml ps; \
+		echo; \
+	fi; \
+	if [ $$cluster_running -gt 0 ]; then \
+		echo "--- Cluster Services ---"; \
+		docker-compose -p weaviate-cluster -f docker/docker-compose.cluster.yml ps; \
+		echo; \
+	fi; \
+	if [ $$single_running -eq 0 ] && [ $$cluster_running -eq 0 ]; then \
+		echo "No Weaviate services are currently running"; \
+		echo "Use 'make up-single' or 'make up-cluster' to start services"; \
+	fi
 
 # Show logs for all services
 logs:

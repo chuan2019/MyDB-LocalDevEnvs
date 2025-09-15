@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres-primary:
     image: postgres:16-alpine
@@ -12,7 +10,7 @@ services:
       POSTGRES_REPLICATION_USER: ${POSTGRES_REPLICATION_USER:-replicator}
       POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD:-replicator123}
     ports:
-      - "${POSTGRES_PRIMARY_PORT:-5432}:5432"
+      - "${POSTGRES_PRIMARY_PORT:-5435}:5432"
     volumes:
       - postgres_primary_data:/var/lib/postgresql/data
       - ./cluster-init-scripts:/docker-entrypoint-initdb.d
@@ -143,7 +141,7 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
-      - "${PGADMIN_PORT:-8080}:80"
+      - "${PGADMIN_CLUSTER_PORT:-8081}:80"
     volumes:
       - pgadmin_cluster_data:/var/lib/pgadmin
       - ./pgadmin-cluster-servers.json:/pgadmin4/servers.json
