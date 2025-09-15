@@ -1,0 +1,47 @@
+[
+  {
+    "title": "Machine Learning Basics",
+    "content": "Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed.",
+    "category": "Education",
+    "author": "Data Scientist",
+    "tags": ["AI", "ML", "Technology"],
+    "difficulty": "Beginner",
+    "rating": 4.5
+  },
+  {
+    "title": "Vector Databases Explained",
+    "content": "Vector databases are specialized databases designed to store and query high-dimensional vectors efficiently, making them ideal for AI applications.",
+    "category": "Technology",
+    "author": "Database Engineer",
+    "tags": ["Database", "Vectors", "AI"],
+    "difficulty": "Intermediate",
+    "rating": 4.2
+  },
+  {
+    "title": "Introduction to Weaviate",
+    "content": "Weaviate is an open-source vector database that allows you to store data objects and vector embeddings from your favorite ML-models.",
+    "category": "Technology",
+    "author": "Weaviate Team",
+    "tags": ["Weaviate", "Vector Database", "Open Source"],
+    "difficulty": "Beginner",
+    "rating": 4.8
+  },
+  {
+    "title": "Clustering in Distributed Systems",
+    "content": "Clustering allows multiple instances of an application to work together, providing high availability and load distribution.",
+    "category": "Technology",
+    "author": "Systems Architect",
+    "tags": ["Clustering", "Distributed Systems", "Architecture"],
+    "difficulty": "Advanced",
+    "rating": 4.3
+  },
+  {
+    "title": "JSON Data Processing",
+    "content": "JSON is a lightweight data interchange format that is easy for humans to read and write, and easy for machines to parse and generate.",
+    "category": "Programming",
+    "author": "Software Developer",
+    "tags": ["JSON", "Data", "Programming"],
+    "difficulty": "Beginner",
+    "rating": 4.0
+  }
+]
