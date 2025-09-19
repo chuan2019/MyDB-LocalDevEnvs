@@ -73,9 +73,9 @@ if [ $? -eq 0 ]; then
     REPLICA_DATA=$(psql -h "$REPLICA_HOST" -p "$REPLICA_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -t -c "SELECT test_data FROM $TEST_TABLE LIMIT 1;" 2>/dev/null | tr -d '[:space:]')
     
     if [ "$REPLICA_DATA" = "replicationtestdata" ]; then
-        echo "✓ Replication test PASSED: Data successfully replicated to replica!"
+        echo "PASSED: Replication test - Data successfully replicated to replica!"
     else
-        echo "✗ Replication test FAILED: Data not found on replica."
+        echo "FAILED: Replication test - Data not found on replica."
         echo "Expected: 'replication test data', Got: '$REPLICA_DATA'"
     fi
     
@@ -83,7 +83,7 @@ if [ $? -eq 0 ]; then
     echo "Cleaning up test table..."
     psql -h "$PRIMARY_HOST" -p "$PRIMARY_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "DROP TABLE $TEST_TABLE;" > /dev/null 2>&1
 else
-    echo "✗ Failed to create test table on primary."
+    echo "FAILED: Could not create test table on primary."
     exit 1
 fi
 
