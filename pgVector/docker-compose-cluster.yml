@@ -1,0 +1,41 @@
+services:
+  postgres-primary:
+    build: .
+    container_name: pgvector-primary
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgvector-data-primary:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./postgresql-primary.conf:/etc/postgresql/postgresql.conf
+    ports:
+      - "5432:5432"
+    networks:
+      - pgvector-net
+
+  postgres-replica:
+    build: .
+    container_name: pgvector-replica
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REPLICATE_FROM: pgvector-primary
+    volumes:
+      - pgvector-data-replica:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./postgresql-replica.conf:/etc/postgresql/postgresql.conf
+    ports:
+      - "5433:5432"
+    networks:
+      - pgvector-net
+
+networks:
+  pgvector-net:
+    driver: bridge
+
+volumes:
+  pgvector-data-primary:
+  pgvector-data-replica:
