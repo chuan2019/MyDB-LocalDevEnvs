@@ -1,4 +1,4 @@
-.PHONY: build up down restart logs backup restore monitor test-replication
+.PHONY: build up down restart logs backup restore monitor test-replication test-vectors
 
 build:
 	docker-compose build
@@ -26,3 +26,6 @@ monitor:
 
 test-replication:
 	scripts/test-replication.sh
+
+test-vectors:
+	scripts/test-vector-similarity.sh

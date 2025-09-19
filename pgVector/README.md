@@ -60,6 +60,48 @@ This project sets up a local development environment for the pgvector vector dat
 - Use the provided scripts in the `scripts/` directory for backup, restore, monitoring, and testing replication.
 - Modify the configuration files as needed to suit your development requirements.
 
+## Vector Similarity Search Testing
+
+This setup includes comprehensive test cases for vector similarity search operations:
+
+### Running Vector Tests
+
+```bash
+# Run the complete vector similarity test suite
+./scripts/test-vector-similarity.sh
+
+# Or run specific SQL test cases
+docker compose exec postgres psql -U pgvector_user -d pgvector_db -f /init-scripts/04-vector-test-cases.sql
+```
+
+### Test Categories
+
+1. **Basic Vector Operations** - Creating and querying vector data
+2. **Distance Metrics** - L2 distance, cosine similarity, inner product
+3. **Product Recommendations** - Similarity-based product matching
+4. **Document Similarity** - Text content similarity search
+5. **User Preference Matching** - Finding similar user profiles
+6. **Performance Testing** - Index usage and query optimization
+7. **Vector Arithmetic** - Addition, subtraction, scalar multiplication
+8. **High-Dimensional Vectors** - Testing with vectors up to 384 dimensions
+9. **Anomaly Detection** - Finding outliers in vector data
+10. **Clustering Analysis** - Grouping similar vectors
+
+### Available Distance Operators
+
+- `<->` : L2 distance (Euclidean) - smaller values = more similar
+- `<=>` : Cosine distance - smaller values = more similar direction  
+- `<#>` : Negative inner product - larger absolute values = more aligned
+
+### Sample Use Cases
+
+The test suite demonstrates practical applications including:
+- E-commerce product recommendations
+- Document similarity search
+- User behavior analysis
+- Content-based filtering
+- Anomaly detection in high-dimensional data
+
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
