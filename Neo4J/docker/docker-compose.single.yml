@@ -1,0 +1,26 @@
+services:
+  neo4j:
+    image: neo4j:5.18.0
+    container_name: neo4j-single
+    ports:
+      - 7474:7474  # HTTP
+      - 7687:7687  # Bolt
+    environment:
+      NEO4J_AUTH: neo4j/testpass
+      NEO4J_dbms_memory_pagecache_size: 1G
+      NEO4J_dbms_memory_heap_initial__size: 1G
+      NEO4J_dbms_memory_heap_max__size: 2G
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+    networks:
+      - neo4j_net
+
+networks:
+  neo4j_net:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+    driver: local

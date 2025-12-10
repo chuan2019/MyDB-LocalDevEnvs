@@ -1,0 +1,99 @@
+x-neo4j-common: &neo4j-common
+  image: neo4j:5.18.0
+  environment:
+    NEO4J_AUTH: neo4j/test
+    NEO4J_dbms_memory_pagecache_size: 1G
+    NEO4J_dbms_memory_heap_initial__size: 1G
+    NEO4J_dbms_memory_heap_max__size: 2G
+    NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+  restart: unless-stopped
+  networks:
+    - neo4j_net
+
+services:
+  neo4j-core-1:
+    <<: *neo4j-common
+    container_name: neo4j-core-1
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - neo4j_core1_data:/data
+    environment:
+      <<: *neo4j-common.environment
+      NEO4J_dbms_mode: CORE
+      NEO4J_causal__clustering_discovery__type: LIST
+      NEO4J_causal__clustering_initial__discovery__members: "neo4j-core-1:5000,neo4j-core-2:5000,neo4j-core-3:5000"
+      NEO4J_causal__clustering_expected__core__cluster__size: 3
+      NEO4J_causal__clustering_discovery__advertised__address: neo4j-core-1:5000
+      NEO4J_causal__clustering_transaction__advertised__address: neo4j-core-1:6000
+      NEO4J_causal__clustering_raft__advertised__address: neo4j-core-1:7000
+    expose:
+      - 5000
+      - 6000
+      - 7000
+
+  neo4j-core-2:
+    <<: *neo4j-common
+    container_name: neo4j-core-2
+    ports:
+      - 7475:7474
+      - 7688:7687
+    volumes:
+      - neo4j_core2_data:/data
+    environment:
+      <<: *neo4j-common.environment
+      NEO4J_dbms_mode: CORE
+      NEO4J_causal__clustering_discovery__type: LIST
+      NEO4J_causal__clustering_initial__discovery__members: "neo4j-core-1:5000,neo4j-core-2:5000,neo4j-core-3:5000"
+      NEO4J_causal__clustering_expected__core__cluster__size: 3
+      NEO4J_causal__clustering_discovery__advertised__address: neo4j-core-2:5000
+      NEO4J_causal__clustering_transaction__advertised__address: neo4j-core-2:6000
+      NEO4J_causal__clustering_raft__advertised__address: neo4j-core-2:7000
+    expose:
+      - 5000
+      - 6000
+      - 7000
+    depends_on:
+      - neo4j-core-1
+
+  neo4j-core-3:
+    <<: *neo4j-common
+    container_name: neo4j-core-3
+    ports:
+      - 7476:7474
+      - 7689:7687
+    volumes:
+      - neo4j_core3_data:/data
+    environment:
+      <<: *neo4j-common.environment
+      NEO4J_dbms_mode: CORE
+      NEO4J_causal__clustering_discovery__type: LIST
+      NEO4J_causal__clustering_initial__discovery__members: "neo4j-core-1:5000,neo4j-core-2:5000,neo4j-core-3:5000"
+      NEO4J_causal__clustering_expected__core__cluster__size: 3
+      NEO4J_causal__clustering_discovery__advertised__address: neo4j-core-3:5000
+      NEO4J_causal__clustering_transaction__advertised__address: neo4j-core-3:6000
+      NEO4J_causal__clustering_raft__advertised__address: neo4j-core-3:7000
+    expose:
+      - 5000
+      - 6000
+      - 7000
+    depends_on:
+      - neo4j-core-1
+      - neo4j-core-2
+
+networks:
+  neo4j_net:
+    driver: bridge
+    name: neo4j_cluster_network
+
+volumes:
+  neo4j_core1_data:
+    driver: local
+    name: neo4j_core1_data
+  neo4j_core2_data:
+    driver: local
+    name: neo4j_core2_data
+  neo4j_core3_data:
+    driver: local
+    name: neo4j_core3_data
