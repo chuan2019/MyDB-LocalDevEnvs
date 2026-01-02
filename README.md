@@ -10,5 +10,6 @@ Local development environments for databases using Docker Compose.
 - **[Weaviate](./Weaviate/)** - Vector database for AI/ML applications
 - **[Neo4J](./Neo4J/)** - Graph database with single-node support (cluster mode needs Enterprise version)
 - **[MemGraph](./MemGraph/)** - In memory Graph database with single-node and cluster support
+- **[ScyllaDB](./ScyllaDB/)** - NoSQL database with ScyllaDB
 
 Each directory contains Docker Compose configurations and setup scripts for quick local deployment.
