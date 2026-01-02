@@ -1,0 +1,5 @@
+# Default configuration - uses single node mode
+# For cluster mode, use: docker-compose -f docker/docker-compose.cluster.yml up
+
+include:
+  - docker-compose.single.yml
