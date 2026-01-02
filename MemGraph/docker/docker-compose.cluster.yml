@@ -1,0 +1,75 @@
+services:
+  memgraph1:
+    image: memgraph/memgraph-platform:latest
+    container_name: memgraph-node1
+    ports:
+      - "7687:7687"  # Bolt protocol
+      - "3000:3000"  # MemGraph Lab (web UI)
+      - "7444:7444"  # Monitoring
+    environment:
+      - MEMGRAPH="--log-level=TRACE --replication-replica-check-frequency-sec=1"
+    volumes:
+      - memgraph_data1:/var/lib/memgraph
+      - memgraph_log1:/var/log/memgraph
+      - memgraph_etc1:/etc/memgraph
+    restart: unless-stopped
+    networks:
+      - memgraph_cluster_net
+
+  memgraph2:
+    image: memgraph/memgraph-platform:latest
+    container_name: memgraph-node2
+    ports:
+      - "7688:7687"  # Bolt protocol
+      - "3001:3000"  # MemGraph Lab (web UI)
+      - "7445:7444"  # Monitoring
+    environment:
+      - MEMGRAPH="--log-level=TRACE --replication-replica-check-frequency-sec=1"
+    volumes:
+      - memgraph_data2:/var/lib/memgraph
+      - memgraph_log2:/var/log/memgraph
+      - memgraph_etc2:/etc/memgraph
+    restart: unless-stopped
+    networks:
+      - memgraph_cluster_net
+
+  memgraph3:
+    image: memgraph/memgraph-platform:latest
+    container_name: memgraph-node3
+    ports:
+      - "7689:7687"  # Bolt protocol
+      - "3002:3000"  # MemGraph Lab (web UI)
+      - "7446:7444"  # Monitoring
+    environment:
+      - MEMGRAPH="--log-level=TRACE --replication-replica-check-frequency-sec=1"
+    volumes:
+      - memgraph_data3:/var/lib/memgraph
+      - memgraph_log3:/var/log/memgraph
+      - memgraph_etc3:/etc/memgraph
+    restart: unless-stopped
+    networks:
+      - memgraph_cluster_net
+
+networks:
+  memgraph_cluster_net:
+    driver: bridge
+
+volumes:
+  memgraph_data1:
+    driver: local
+  memgraph_log1:
+    driver: local
+  memgraph_etc1:
+    driver: local
+  memgraph_data2:
+    driver: local
+  memgraph_log2:
+    driver: local
+  memgraph_etc2:
+    driver: local
+  memgraph_data3:
+    driver: local
+  memgraph_log3:
+    driver: local
+  memgraph_etc3:
+    driver: local
