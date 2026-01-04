@@ -32,6 +32,12 @@ MemGraph/
 │   ├── setup.sh             # Environment setup
 │   ├── test-connection.sh   # Test MemGraph connection
 │   └── test-basic-graph.sh  # Create/query sample data
+├── notebooks/               # Jupyter notebooks for demos and testing
+│   ├── 01-getting-started.ipynb    # Basic MemGraph operations
+│   ├── 02-graph-queries.ipynb      # Advanced query techniques
+│   └── 03-algorithms.ipynb         # Graph algorithms
+├── .venv/                   # Python virtual environment
+├── pyproject.toml           # Python dependencies
 ├── Makefile                 # Build automation
 └── README.md                # This file
 ```
@@ -65,6 +71,34 @@ cd scripts
 ./test-connection.sh
 ./test-basic-graph.sh
 ```
+
+## Jupyter Notebooks
+
+Interactive notebooks for learning and testing MemGraph are available in the `notebooks/` directory:
+
+- **01-getting-started.ipynb**: Basic operations, connecting to MemGraph, creating nodes and relationships
+- **02-graph-queries.ipynb**: Advanced queries, path finding, pattern matching, aggregations
+- **03-algorithms.ipynb**: Graph algorithms including centrality measures, community detection, and network analysis
+
+### Setup Python Environment
+
+To use the notebooks, first set up the Python virtual environment:
+
+```bash
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Start Jupyter
+jupyter notebook notebooks/
+```
+
+The environment includes:
+- `gqlalchemy`: MemGraph Python client
+- `neo4j`: Neo4j Python driver (compatible with MemGraph)
+- `jupyter`: Jupyter notebook server
+- `pandas`: Data analysis
+- `matplotlib`: Visualization
+- `networkx`: Graph analysis tools
 
 ## Requirements
 

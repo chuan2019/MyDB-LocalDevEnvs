@@ -1,0 +1,14 @@
+[project]
+name = "memgraph-notebooks"
+version = "0.1.0"
+description = "Jupyter notebooks for MemGraph testing and demos"
+requires-python = ">=3.9"
+dependencies = [
+    "gqlalchemy>=1.4.0",
+    "neo4j>=5.14.0",
+    "jupyter>=1.0.0",
+    "ipykernel>=6.25.0",
+    "pandas>=2.0.0",
+    "matplotlib>=3.7.0",
+    "networkx>=3.1",
+]
